@@ -42,7 +42,6 @@
 #include <string>
 
 #include <ros/ros.h>
-#include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
 
 #include <sensor_msgs/PointCloud2.h>
@@ -50,6 +49,7 @@
 
 #include <dynamic_reconfigure/server.h>
 #include <velodyne_pointcloud/CloudNodeConfig.h>
+#include <diagnostic_updater/diagnostic_updater.h>
 
 namespace velodyne_pointcloud
 {

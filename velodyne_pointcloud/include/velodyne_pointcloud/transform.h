@@ -44,7 +44,6 @@
 #include <ros/ros.h>
 #include "tf/message_filter.h"
 #include "message_filters/subscriber.h"
-#include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
 #include <sensor_msgs/PointCloud2.h>
 
@@ -53,6 +52,7 @@
 
 #include <dynamic_reconfigure/server.h>
 #include <velodyne_pointcloud/TransformNodeConfig.h>
+#include <diagnostic_updater/diagnostic_updater.h>
 
 namespace velodyne_pointcloud
 {

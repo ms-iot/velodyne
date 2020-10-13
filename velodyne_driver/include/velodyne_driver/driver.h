@@ -35,8 +35,9 @@
 
 #include <string>
 #include <ros/ros.h>
-#include <diagnostic_updater/diagnostic_updater.h>
+
 #include <diagnostic_updater/publisher.h>
+#include <diagnostic_updater/diagnostic_updater.h>
 #include <dynamic_reconfigure/server.h>
 
 #include <velodyne_driver/input.h>
