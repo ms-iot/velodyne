@@ -44,15 +44,34 @@
  *              PCAP dump
  */
 
+#ifdef WIN32
+#include <chrono>
+#include <thread>
+#include <windows.h>
+#include <pcap.h>
+#include <ws2tcpip.h>
+inline int inet_aton(PCSTR pszAddrString, PVOID pAddrBuf)
+{
+  return inet_pton(AF_INET, pszAddrString, pAddrBuf);
+}
+
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+
+#undef ERROR
+#undef OK
+
+#else
 #include <unistd.h>
-#include <string>
-#include <sstream>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <poll.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/file.h>
+#endif
+#include <string>
+#include <sstream>
 #include <velodyne_driver/input.h>
 #include <velodyne_driver/time_conversion.hpp>
 
@@ -119,12 +138,13 @@ namespace velodyne_driver
         perror("bind");                 // TODO: ROS_ERROR errno
         return;
       }
-  
+  #ifndef WIN32
     if (fcntl(sockfd_,F_SETFL, O_NONBLOCK|FASYNC) < 0)
       {
         perror("non-block");
         return;
       }
+  #endif
 
     ROS_DEBUG("Velodyne socket fd is %d\n", sockfd_);
   }
@@ -132,7 +152,7 @@ namespace velodyne_driver
   /** @brief destructor */
   InputSocket::~InputSocket(void)
   {
-    (void) close(sockfd_);
+    (void) _close(sockfd_);
   }
 
   /** @brief Get one velodyne packet. */
@@ -170,7 +190,12 @@ namespace velodyne_driver
         // poll() until input available
         do
           {
+            #ifdef WIN32
+            int retval = WSAPoll(fds, 1, POLL_TIMEOUT);
+            #else
             int retval = poll(fds, 1, POLL_TIMEOUT);
+            #endif
+
             if (retval < 0)             // poll() error?
               {
                 if (errno != EINTR)
@@ -193,7 +218,7 @@ namespace velodyne_driver
 
         // Receive packets that should now be available from the
         // socket using a blocking read.
-        ssize_t nbytes = recvfrom(sockfd_, &pkt->data[0],
+        ssize_t nbytes = recvfrom(sockfd_, (char*)&pkt->data[0],
                                   packet_size,  0,
                                   (sockaddr*) &sender_address,
                                   &sender_address_len);
@@ -339,7 +364,11 @@ namespace velodyne_driver
           {
             ROS_INFO("end of file reached -- delaying %.3f seconds.",
                      repeat_delay_);
+            #if WIN32
+            std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(repeat_delay_ * 1000.0)));
+            #else
             usleep(rint(repeat_delay_ * 1000000.0));
+            #endif
           }
 
         ROS_DEBUG("replaying Velodyne dump file");

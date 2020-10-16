@@ -1,4 +1,6 @@
 # build the driver node
+link_directories(${libpcap_LIBRARY_DIRS})
+
 add_executable(velodyne_node velodyne_node.cc driver.cc)
 add_dependencies(velodyne_node velodyne_driver_gencfg)
 target_link_libraries(velodyne_node

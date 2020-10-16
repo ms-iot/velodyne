@@ -10,6 +10,10 @@ elseif ("${CMAKE_CXX_STANDARD_COMPUTED_DEFAULT}" STREQUAL "98")
   set(CMAKE_CXX_STANDARD 11)
 endif()
 
+if(MSVC)
+  set(CMAKE_CXX_STANDARD 11)
+endif()
+
 set(${PROJECT_NAME}_CATKIN_DEPS 
     diagnostic_updater
     dynamic_reconfigure
@@ -23,10 +27,27 @@ find_package(catkin REQUIRED COMPONENTS ${${PROJECT_NAME}_CATKIN_DEPS} roslint)
 # This driver uses Boost threads
 find_package(Boost REQUIRED COMPONENTS thread)
 
-# libpcap provides no pkg-config or find_package module:
-set(libpcap_LIBRARIES -lpcap)
-
 include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
+
+
+# libpcap provides no pkg-config or find_package module:
+if (MSVC)
+
+add_definitions("/D_CRT_SECURE_NO_WARNINGS")
+add_definitions("/D_WIN32")
+
+add_compile_options("/wd4267")
+
+find_package(PkgConfig)
+if(PKG_CONFIG_FOUND)
+pkg_check_modules(libpcap libpcap REQUIRED)
+include_directories(${libpcap_INCLUDE_DIRS})
+link_directories(${libpcap_LIBRARY_DIRS})
+endif()
+else()
+set(libpcap_LIBRARIES -lpcap)
+endif()
+
 
 # Generate dynamic_reconfigure server
 generate_dynamic_reconfigure_options(cfg/VelodyneNode.cfg)

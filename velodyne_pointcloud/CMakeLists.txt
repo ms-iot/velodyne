@@ -40,6 +40,16 @@ find_library(YAML_CPP_LIBRARY
              NAMES YAML_CPP
              PATHS ${YAML_CPP_LIBRARY_DIRS})
 
+if (MSVC)
+find_package(PkgConfig)
+if(PKG_CONFIG_FOUND)
+pkg_check_modules(libpcap libpcap REQUIRED)
+include_directories(${libpcap_INCLUDE_DIRS})
+link_directories(${libpcap_LIBRARY_DIRS})
+endif()
+endif()
+
+
 link_directories(${YAML_CPP_LIBRARY_DIRS})
 
 generate_dynamic_reconfigure_options(
