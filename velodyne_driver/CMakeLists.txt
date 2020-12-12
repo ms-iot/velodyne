@@ -14,6 +14,9 @@ if(MSVC)
   set(CMAKE_CXX_STANDARD 11)
 endif()
 
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+
 set(${PROJECT_NAME}_CATKIN_DEPS 
     diagnostic_updater
     dynamic_reconfigure
