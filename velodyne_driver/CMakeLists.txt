@@ -14,6 +14,9 @@ if(MSVC)
   set(CMAKE_CXX_STANDARD 11)
 endif()
 
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
+
 set(${PROJECT_NAME}_CATKIN_DEPS 
     diagnostic_updater
     dynamic_reconfigure
@@ -40,6 +43,7 @@ add_compile_options("/wd4267")
 
 find_package(PkgConfig)
 if(PKG_CONFIG_FOUND)
+set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH TRUE)
 pkg_check_modules(libpcap libpcap REQUIRED)
 include_directories(${libpcap_INCLUDE_DIRS})
 link_directories(${libpcap_LIBRARY_DIRS})

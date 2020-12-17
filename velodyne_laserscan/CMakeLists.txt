@@ -10,6 +10,8 @@ elseif ("${CMAKE_CXX_STANDARD_COMPUTED_DEFAULT}" STREQUAL "98")
   set(CMAKE_CXX_STANDARD 11)
 endif()
 
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   nodelet

@@ -9,6 +9,8 @@ target_link_libraries(velodyne_node
   ${libpcap_LIBRARIES}
 )
 
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
 # build the nodelet version
 add_library(driver_nodelet nodelet.cc driver.cc)
 add_dependencies(driver_nodelet velodyne_driver_gencfg)
