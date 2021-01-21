@@ -44,7 +44,7 @@
  *              PCAP dump
  */
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <chrono>
 #include <thread>
 #include <windows.h>
@@ -138,7 +138,7 @@ namespace velodyne_driver
         perror("bind");                 // TODO: ROS_ERROR errno
         return;
       }
-  #ifndef WIN32
+  #ifndef _WIN32
     if (fcntl(sockfd_,F_SETFL, O_NONBLOCK|FASYNC) < 0)
       {
         perror("non-block");
@@ -190,7 +190,7 @@ namespace velodyne_driver
         // poll() until input available
         do
           {
-            #ifdef WIN32
+            #ifdef _WIN32
             int retval = WSAPoll(fds, 1, POLL_TIMEOUT);
             #else
             int retval = poll(fds, 1, POLL_TIMEOUT);
@@ -364,7 +364,7 @@ namespace velodyne_driver
           {
             ROS_INFO("end of file reached -- delaying %.3f seconds.",
                      repeat_delay_);
-            #if WIN32
+            #if _WIN32
             std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(repeat_delay_ * 1000.0)));
             #else
             usleep(rint(repeat_delay_ * 1000000.0));
