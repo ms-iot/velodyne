@@ -152,7 +152,11 @@ namespace velodyne_driver
   /** @brief destructor */
   InputSocket::~InputSocket(void)
   {
+  #ifdef _WIN32
     (void) _close(sockfd_);
+  #else
+    (void) close(sockfd_);
+  #endif
   }
 
   /** @brief Get one velodyne packet. */
