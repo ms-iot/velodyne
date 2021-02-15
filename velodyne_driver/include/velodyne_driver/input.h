@@ -56,7 +56,7 @@
 #include <stdio.h>
 #include <pcap.h>
 #include <string>
-#ifdef WIN32
+#ifdef _WIN32
 #else
 #include <unistd.h>
 #include <netinet/in.h>
