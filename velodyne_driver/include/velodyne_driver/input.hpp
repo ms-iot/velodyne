@@ -53,7 +53,9 @@
 #ifndef VELODYNE_DRIVER__INPUT_HPP_
 #define VELODYNE_DRIVER__INPUT_HPP_
 
+#ifndef _WIN32
 #include <netinet/in.h>
+#endif
 
 #include <pcap.h>
 

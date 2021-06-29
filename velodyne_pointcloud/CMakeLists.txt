@@ -10,6 +10,11 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+if (WIN32)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+  add_definitions(-D_USE_MATH_DEFINES -DNOGDI -DNOMINMAX)
+endif()
+
 find_package(ament_cmake REQUIRED)
 find_package(angles REQUIRED)
 find_package(diagnostic_updater REQUIRED)
@@ -24,18 +29,27 @@ find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(velodyne_msgs REQUIRED)
 
-# Resolve system dependency on yaml-cpp, which apparently does not
-# provide a CMake find_package() module.
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
-find_path(YAML_CPP_INCLUDE_DIR
-  NAMES yaml_cpp.h
-  PATHS ${YAML_CPP_INCLUDE_DIRS})
-find_library(YAML_CPP_LIBRARY
-  NAMES YAML_CPP
-  PATHS ${YAML_CPP_LIBRARY_DIRS})
+if (WIN32)
+  find_package(yaml-cpp REQUIRED)
+else()
+  # Resolve system dependency on yaml-cpp, which apparently does not
+  # provide a CMake find_package() module.
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
+  find_path(YAML_CPP_INCLUDE_DIR
+    NAMES yaml_cpp.h
+    PATHS ${YAML_CPP_INCLUDE_DIRS})
+  find_library(YAML_CPP_LIBRARY
+    NAMES YAML_CPP
+    PATHS ${YAML_CPP_LIBRARY_DIRS})
 
-link_directories(${YAML_CPP_LIBRARY_DIRS})
+  link_directories(${YAML_CPP_LIBRARY_DIRS})
+endif()
+
+get_cmake_property(_variableNames VARIABLES)
+foreach (_variableName ${_variableNames})
+    message(STATUS "${_variableName}=${${_variableName}}")
+endforeach()
 
 if(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
   add_definitions(-DHAVE_NEW_YAMLCPP)

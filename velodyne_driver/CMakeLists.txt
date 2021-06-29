@@ -10,6 +10,11 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+if (WIN32)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+  add_definitions(-D_USE_MATH_DEFINES -DNOGDI -DNOMINMAX)
+endif()
+
 find_package(ament_cmake_ros REQUIRED)
 find_package(diagnostic_msgs REQUIRED)
 find_package(diagnostic_updater REQUIRED)
@@ -18,8 +23,17 @@ find_package(rclcpp_components REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(velodyne_msgs REQUIRED)
 
-# libpcap provides no pkg-config or find_package module:
-set(libpcap_LIBRARIES -lpcap)
+if (WIN32)
+  find_package(PkgConfig)
+  if(PKG_CONFIG_FOUND)
+    pkg_check_modules(libpcap libpcap REQUIRED)
+    include_directories(${libpcap_INCLUDE_DIRS})
+    link_directories(${libpcap_LIBRARY_DIRS})
+  endif()
+else()
+  # libpcap provides no pkg-config or find_package module:
+  set(libpcap_LIBRARIES -lpcap)
+endif()
 
 include_directories(include)
 

@@ -44,14 +44,32 @@
  *              PCAP dump
  */
 
-#include <velodyne_msgs/msg/velodyne_packet.hpp>
+#ifdef _WIN32
+#include <chrono>
+#include <thread>
 
+#define _WINSOCKAPI_
+#include <windows.h>
+#include <ws2tcpip.h>
+inline int inet_aton(PCSTR pszAddrString, PVOID pAddrBuf)
+{
+  return inet_pton(AF_INET, pszAddrString, pAddrBuf);
+}
+
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+
+#undef ERROR
+#undef OK
+
+#else
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <poll.h>
 #include <sys/file.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#endif
 
 #include <cerrno>
 #include <cmath>
@@ -59,6 +77,7 @@
 #include <sstream>
 #include <string>
 
+#include <velodyne_msgs/msg/velodyne_packet.hpp>
 #include "velodyne_driver/input.hpp"
 #include "velodyne_driver/time_conversion.hpp"
 
@@ -131,12 +150,14 @@ InputSocket::InputSocket(
     return;
   }
 
+#ifndef _WIN32
   if (::fcntl(sockfd_, F_SETFL, O_NONBLOCK | FASYNC) < 0) {
     RCLCPP_ERROR(
       private_nh->get_logger(),
       "Error setting socket to non-blocking: %s", ::strerror(errno));
     return;
   }
+#endif
 
   RCLCPP_DEBUG(private_nh->get_logger(), "Velodyne socket fd is %d\n", sockfd_);
 }
@@ -144,7 +165,7 @@ InputSocket::InputSocket(
 /** @brief destructor */
 InputSocket::~InputSocket()
 {
-  (void) ::close(sockfd_);
+  (void) ::_close(sockfd_);
 }
 
 /** @brief Get one velodyne packet. */
@@ -180,7 +201,12 @@ int InputSocket::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const doubl
 
     // poll() until input available
     do {
+      #ifdef WIN32
+      int retval = ::WSAPoll(fds, 1, POLL_TIMEOUT);
+      #else
       int retval = ::poll(fds, 1, POLL_TIMEOUT);
+      #endif
+
       if (retval < 0) {           // poll() error?
         if (errno != EINTR) {
           RCLCPP_ERROR(private_nh_->get_logger(), "poll() error: %s", ::strerror(errno));
@@ -208,7 +234,7 @@ int InputSocket::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const doubl
     // Receive packets that should now be available from the
     // socket using a blocking read.
     ssize_t nbytes = ::recvfrom(
-      sockfd_, &pkt->data[0],
+      sockfd_, (char*)&pkt->data[0],
       packet_size, 0,
       reinterpret_cast<sockaddr *>(&sender_address),
       &sender_address_len);
@@ -363,7 +389,12 @@ int InputPCAP::getPacket(velodyne_msgs::msg::VelodynePacket * pkt, const double 
       RCLCPP_INFO(
         private_nh_->get_logger(), "end of file reached -- delaying %.3f seconds.",
         repeat_delay_);
-      ::usleep(::rint(repeat_delay_ * 1000000.0));
+
+      #if WIN32
+        std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(repeat_delay_ * 1000.0)));
+      #else
+        ::usleep(::rint(repeat_delay_ * 1000000.0));
+      #endif        
     }
 
     RCLCPP_DEBUG(private_nh_->get_logger(), "replaying Velodyne dump file");

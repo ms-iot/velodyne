@@ -6,6 +6,10 @@ if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
 endif()
 
+if (WIN32)
+  add_definitions(-D_USE_MATH_DEFINES -DNOGDI)
+endif()
+
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
@@ -16,6 +20,8 @@ find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
 include_directories(include)
+
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 add_library(${PROJECT_NAME} SHARED
   src/velodyne_laserscan.cpp

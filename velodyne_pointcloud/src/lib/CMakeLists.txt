@@ -1,4 +1,4 @@
-add_library(velodyne_rawdata SHARED
+add_library(velodyne_rawdata STATIC
   rawdata.cpp
   calibration.cpp)
 ament_target_dependencies(velodyne_rawdata
@@ -11,7 +11,7 @@ ament_target_dependencies(velodyne_rawdata
   velodyne_msgs
 )
 
-add_library(velodyne_cloud_types SHARED
+add_library(velodyne_cloud_types STATIC
   pointcloudXYZIR.cpp
   organized_cloudXYZIR.cpp
 )
