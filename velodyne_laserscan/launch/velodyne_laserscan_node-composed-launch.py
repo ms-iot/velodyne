@@ -52,7 +52,7 @@ def generate_launch_description():
             node_name='velodyne_laserscan_container',
             node_namespace='',
             package='rclcpp_components',
-            node_executable='component_container',
+            executable='component_container',
             composable_node_descriptions=[
                 ComposableNode(
                     package='velodyne_laserscan',
